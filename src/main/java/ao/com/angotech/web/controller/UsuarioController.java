@@ -2,6 +2,10 @@ package ao.com.angotech.web.controller;
 
 import ao.com.angotech.entity.Usuario;
 import ao.com.angotech.service.UsuarioService;
+import ao.com.angotech.web.dto.UsuarioCreateDto;
+import ao.com.angotech.web.dto.UsuarioResponseDto;
+import ao.com.angotech.web.dto.UsuarioSenhaDto;
+import ao.com.angotech.web.dto.mapper.UsuarioMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,39 +23,38 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> create(@RequestBody Usuario usuario) {
-        Usuario user = usuarioService.salvar(usuario);
+    public ResponseEntity<UsuarioResponseDto> create(@RequestBody UsuarioCreateDto createDto) {
+        Usuario user = usuarioService.salvar(UsuarioMapper.toUsuario(createDto));
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(user);
+                .body(UsuarioMapper.toDto(user));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> getById(@PathVariable Long id) {
+    public ResponseEntity<UsuarioResponseDto> getById(@PathVariable Long id) {
         Usuario user = usuarioService.buscarPorId(id);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(user);
+                .body(UsuarioMapper.toDto(user));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Usuario> updatePassword(@PathVariable Long id, @RequestBody Usuario usuario) {
-        Usuario user = usuarioService.editarSenha(id, usuario);
+    public ResponseEntity<Void> updatePassword(@PathVariable Long id, @RequestBody UsuarioSenhaDto dto) {
+        Usuario user = usuarioService.editarSenha(id, dto.senhaAtual(), dto.novaSenha(), dto.confirmaSenha());
 
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(user);
+                .noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<Usuario>> getAll() {
+    public ResponseEntity<List<UsuarioResponseDto>> getAll() {
         List<Usuario> user = usuarioService.buscarTodos();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(user);
+                .body(UsuarioMapper.toListDto(user));
     }
 
 }
